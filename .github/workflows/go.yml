@@ -35,7 +35,7 @@ jobs:
         GOOS: linux
         GOARCH: arm
 
-    - name: Build arm
+    - name: Build arm64
       run: go build -o fanshim_linux_arm64 -v .
       env:
         GOOS: linux

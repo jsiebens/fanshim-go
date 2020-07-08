@@ -30,13 +30,13 @@ jobs:
           ${{ runner.os }}-go-
 
     - name: Build arm
-      run: go build -o fanshim_linux_arm -v .
+      run: go build -o fanshim_linux_arm .
       env:
         GOOS: linux
         GOARCH: arm
 
     - name: Build arm64
-      run: go build -o fanshim_linux_arm64 -v .
+      run: go build -o fanshim_linux_arm64 .
       env:
         GOOS: linux
         GOARCH: arm64

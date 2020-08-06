@@ -7,6 +7,7 @@ import (
 	"github.com/shirou/gopsutil/host"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -67,7 +68,7 @@ func getCpuTemp() (float64, error) {
 	temperatures, _ := host.SensorsTemperatures()
 
 	for _, s := range temperatures {
-		if s.SensorKey == "cpu-thermal" || s.SensorKey == "cpu_thermal" {
+		if strings.HasPrefix(s.SensorKey, "cpu-thermal") || strings.HasPrefix(s.SensorKey, "cpu_thermal") {
 			return s.Temperature, nil
 		}
 	}

@@ -22,6 +22,7 @@ var offThreshold = flag.Float64("off-threshold", 55.0, "Temperature threshold in
 var onThreshold = flag.Float64("on-threshold", 65.0, "Temperature threshold in degrees C to enable fan")
 var extendedColors = flag.Bool("extended-colors", false, "Extend LED colors for outside of normal low to high range")
 var delay = flag.Int("delay", 2, "Delay, in seconds, between temperature readings")
+var brightness = flag.Int("brightness", 255, "LED brightness, from 0 to 255")
 var verbose = flag.Bool("verbose", false, "Output temp and fan status messages")
 
 func main() {
@@ -105,7 +106,7 @@ func updateLed(led *Led, temp float64) {
 		hue = (1.0 - temp) * 120.0 / 360.0
 	}
 
-	color := colorful.Hsv(hue*360, 1.0, 1.0)
+	color := colorful.Hsv(hue*360, 1.0, float64(*brightness)/255.0)
 	led.SetPixel(int(color.R*255), int(color.G*255), int(color.B*255))
 }
 

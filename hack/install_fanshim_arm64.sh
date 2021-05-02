@@ -1,9 +1,20 @@
 #!/bin/bash
 set -e
 
-sudo curl -L -o /usr/local/bin/fanshim_linux_arm64 https://github.com/jsiebens/fanshim-go/releases/download/v0.3.0/fanshim_linux_arm64
+sudo systemctl stop fanshim || true
+
+sudo curl -sL -o /usr/local/bin/fanshim_linux_arm64 https://github.com/jsiebens/fanshim-go/releases/download/v0.4.0/fanshim_linux_arm64
 sudo chmod 755 /usr/local/bin/fanshim_linux_arm64
 
+sudo mkdir -p /etc/fanshim.d
+
+sudo tee /etc/fanshim.d/env >/dev/null <<EOF
+OFF_THRESHOLD=55
+ON_THRESHOLD=65
+DELAY=5
+VERBOSE=true
+BRIGHTNESS=50
+EOF
 
 sudo tee /etc/systemd/system/fanshim.service >/dev/null <<EOF
 [Unit]
@@ -11,7 +22,8 @@ Description="FanShim Controller"
 
 [Service]
 Type=exec
-ExecStart=/usr/local/bin/fanshim_linux_arm64 -delay 5 -verbose --on-threshold 80 --off-threshold 65
+EnvironmentFile=/etc/fanshim.d/env
+ExecStart=/usr/local/bin/fanshim_linux_arm64
 KillMode=process
 Restart=on-failure
 
@@ -20,5 +32,6 @@ WantedBy=multi-user.target
 EOF
 sudo chmod 0600 /etc/systemd/system/fanshim.service
 
+sudo systemctl daemon-reload
 sudo systemctl enable fanshim.service
-sudo systemctl start fanshim.service
+sudo systemctl restart fanshim.service

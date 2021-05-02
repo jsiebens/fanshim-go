@@ -1,8 +1,7 @@
-package main
+package pkg
 
 import (
 	"log"
-	"time"
 
 	"github.com/ikester/gpio"
 )
@@ -19,7 +18,7 @@ const defaultBrightnessInt int = 10
 const minBrightness float64 = 0.0
 const maxBrightness float64 = 1.0
 
-func NewLed(brightness ...float64) Led {
+func newLed(brightness ...float64) Led {
 	brightnessInt := defaultBrightnessInt
 	if len(brightness) > 0 {
 		brightnessInt = convertBrightnessToInt(brightness[0])
@@ -71,10 +70,6 @@ func convertBrightnessToInt(brightness float64) int {
 
 func inRangeFloat(minVal float64, testVal float64, maxVal float64) bool {
 	return (testVal >= minVal) && (testVal <= maxVal)
-}
-
-func Delay(ms int) {
-	time.Sleep(time.Duration(ms) * time.Millisecond)
 }
 
 func (bl *Led) Clear() {

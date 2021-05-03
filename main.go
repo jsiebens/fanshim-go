@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jsiebens/fanshim-go/pkg"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/shirou/gopsutil/host"
 )
 
@@ -22,6 +24,11 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
 
 	time.Sleep(100 * time.Millisecond)
+
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", config.Port), nil)
+	}()
 
 	for {
 		select {

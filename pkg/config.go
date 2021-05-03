@@ -10,6 +10,7 @@ const MinTemp = 35
 const MaxTemp = 80
 
 type Config struct {
+	Port           int
 	OffThreshold   float64
 	OnThreshold    float64
 	ExtendedColors bool
@@ -19,6 +20,7 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
+	port := flag.Int("port", 2112, "The port that the health server will bind to")
 	offThreshold := flag.Int("off-threshold", 55.0, "Temperature threshold in degrees C to disable fan")
 	onThreshold := flag.Int("on-threshold", 65.0, "Temperature threshold in degrees C to enable fan")
 	extendedColors := flag.Bool("extended-colors", false, "Extend LED colors for outside of normal low to high range")
@@ -29,6 +31,7 @@ func LoadConfig() *Config {
 	flag.Parse()
 
 	return &Config{
+		Port:           intValue("PORT", *port),
 		OffThreshold:   float64(intValue("OFF_THRESHOLD", *offThreshold)),
 		OnThreshold:    float64(intValue("ON_THRESHOLD", *onThreshold)),
 		ExtendedColors: boolValue("EXTENDED_COLORS", *extendedColors),

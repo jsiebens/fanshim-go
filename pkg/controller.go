@@ -5,6 +5,23 @@ import (
 	"math"
 
 	"github.com/lucasb-eyer/go-colorful"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+var (
+	fanshimTemperature = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "fanshim_temp",
+	})
+	fanshimTargetTemp = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "fanshim_target_temp",
+	})
+	fanshimMaxTemp = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "fanshim_max_temp",
+	})
+	fanshimState = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "fanshim_fan_state",
+	})
 )
 
 type FanshimController struct {
@@ -15,6 +32,7 @@ type FanshimController struct {
 
 func NewController(config *Config, fanshim Fanshim) *FanshimController {
 	fanshim.On()
+	fanshimState.Set(1.0)
 	return &FanshimController{
 		on:      true,
 		fanshim: fanshim,
@@ -25,16 +43,22 @@ func NewController(config *Config, fanshim Fanshim) *FanshimController {
 func (f *FanshimController) Update(temperature float64) {
 	if temperature < f.config.OffThreshold && f.on {
 		f.fanshim.Off()
+		fanshimState.Set(0.0)
 		f.on = false
 	}
 
 	if temperature >= f.config.OnThreshold && !f.on {
 		f.fanshim.On()
+		fanshimState.Set(1.0)
 		f.on = true
 	}
 
 	color := f.calculateColor(temperature)
 	f.fanshim.SetColor(color)
+
+	fanshimTemperature.Set(temperature)
+	fanshimTargetTemp.Set(f.config.OffThreshold)
+	fanshimMaxTemp.Set(f.config.OnThreshold)
 
 	if f.config.Verbose {
 		fmt.Printf("Current: %f, Target: %f, Max: %f, On: %t , Color: %s\n",

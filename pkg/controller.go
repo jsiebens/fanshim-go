@@ -11,16 +11,16 @@ import (
 
 var (
 	fanshimTemperature = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "fanshim_temp",
+		Name: "rpi_fanshim_temp",
 	})
 	fanshimTargetTemp = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "fanshim_target_temp",
+		Name: "rpi_fanshim_target_temp",
 	})
 	fanshimMaxTemp = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "fanshim_max_temp",
+		Name: "rpi_fanshim_max_temp",
 	})
 	fanshimState = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "fanshim_fan_state",
+		Name: "rpi_fanshim_fan_state",
 	})
 )
 

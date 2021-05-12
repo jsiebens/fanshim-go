@@ -9,10 +9,10 @@ sudo chmod 755 /usr/local/bin/fanshim_linux_arm64
 sudo mkdir -p /etc/fanshim.d
 
 sudo tee /etc/fanshim.d/env >/dev/null <<EOF
-OFF_THRESHOLD=55
+OFF_THRESHOLD=50
 ON_THRESHOLD=65
 DELAY=5
-VERBOSE=true
+VERBOSE=false
 BRIGHTNESS=50
 EOF
 

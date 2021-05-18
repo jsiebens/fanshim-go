@@ -49,7 +49,7 @@ func (f *FanshimController) Update(temperature, cpu float64) {
 			f.on = false
 		}
 	} else {
-		if temperature >= f.config.OnThreshold {
+		if temperature >= f.config.OnThreshold || cpu >= f.config.CpuOnThreshold {
 			f.fanshim.On()
 			fanshimState.Set(1.0)
 			f.on = true

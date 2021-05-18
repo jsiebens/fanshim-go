@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 
+	"github.com/jasonlvhit/gocron"
 	"github.com/jsiebens/fanshim-go/pkg"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/host"
+	"github.com/ztrue/shutdown"
 )
 
 func main() {
@@ -21,35 +22,39 @@ func main() {
 	fanshim := pkg.NewGPIOFanshim()
 	controller := pkg.NewController(config, fanshim)
 
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
+	shutdown.Add(func() {
+		gocron.Clear()
+		controller.Cleanup()
+	})
 
-	time.Sleep(100 * time.Millisecond)
+	gocron.Every(config.Delay).Seconds().Do(tick, controller)
+	gocron.Start()
 
 	go func() {
+		fmt.Println("Starting metrics http service ...")
 		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(fmt.Sprintf(":%d", config.Port), nil)
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", config.Port), nil); err != nil {
+			log.Fatal(err)
+		}
 	}()
 
-	for {
-		select {
-		case <-signalChan:
-			controller.Cleanup()
-			return
-		default:
-			temp, err1 := getCpuTemp()
-			percent, err2 := cpu.Percent(0, false)
+	fmt.Println("Starting shutdown listener ...")
+	shutdown.Listen(os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
+}
 
-			if err1 == nil && err2 == nil {
-				controller.Update(temp, percent[0])
-			} else {
-				fmt.Println(err1)
-				fmt.Println(err2)
-			}
-
-			time.Sleep(time.Duration(config.Delay) * time.Second)
-		}
+func tick(controller *pkg.FanshimController) {
+	temp, err := getCpuTemp()
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+	percent, err := cpu.Percent(0, false)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	controller.Update(temp, percent[0])
 }
 
 func getCpuTemp() (float64, error) {

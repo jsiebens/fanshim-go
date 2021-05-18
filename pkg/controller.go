@@ -40,17 +40,20 @@ func NewController(config *Config, fanshim Fanshim) *FanshimController {
 	}
 }
 
-func (f *FanshimController) Update(temperature float64) {
-	if temperature < f.config.OffThreshold && f.on {
-		f.fanshim.Off()
-		fanshimState.Set(0.0)
-		f.on = false
-	}
+func (f *FanshimController) Update(temperature, cpu float64) {
 
-	if temperature >= f.config.OnThreshold && !f.on {
-		f.fanshim.On()
-		fanshimState.Set(1.0)
-		f.on = true
+	if f.on {
+		if temperature < f.config.OffThreshold && cpu < f.config.CpuOffThreshold {
+			f.fanshim.Off()
+			fanshimState.Set(0.0)
+			f.on = false
+		}
+	} else {
+		if temperature >= f.config.OnThreshold {
+			f.fanshim.On()
+			fanshimState.Set(1.0)
+			f.on = true
+		}
 	}
 
 	color := f.calculateColor(temperature)
@@ -61,12 +64,13 @@ func (f *FanshimController) Update(temperature float64) {
 	fanshimMaxTemp.Set(f.config.OnThreshold)
 
 	if f.config.Verbose {
-		fmt.Printf("Current: %f, Target: %f, Max: %f, On: %t , Color: %s\n",
+		fmt.Printf("Current: %f, Target: %f, Max: %f, On: %t , Color: %s, CPU: %f\n",
 			temperature,
 			f.config.OffThreshold,
 			f.config.OnThreshold,
 			f.on,
 			color.Hex(),
+			cpu,
 		)
 	}
 }

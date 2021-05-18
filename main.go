@@ -11,7 +11,8 @@ import (
 
 	"github.com/jsiebens/fanshim-go/pkg"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/host"
 )
 
 func main() {
@@ -36,12 +37,14 @@ func main() {
 			controller.Cleanup()
 			return
 		default:
-			temp, err := getCpuTemp()
+			temp, err1 := getCpuTemp()
+			percent, err2 := cpu.Percent(0, false)
 
-			if err == nil {
-				controller.Update(temp)
+			if err1 == nil && err2 == nil {
+				controller.Update(temp, percent[0])
 			} else {
-				fmt.Println(err)
+				fmt.Println(err1)
+				fmt.Println(err2)
 			}
 
 			time.Sleep(time.Duration(config.Delay) * time.Second)

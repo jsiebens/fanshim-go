@@ -10,19 +10,21 @@ const MinTemp = 35
 const MaxTemp = 80
 
 type Config struct {
-	Port           int
-	OffThreshold   float64
-	OnThreshold    float64
-	ExtendedColors bool
-	Delay          int
-	Brightness     float64
-	Verbose        bool
+	Port            int
+	CpuOffThreshold float64
+	OffThreshold    float64
+	OnThreshold     float64
+	ExtendedColors  bool
+	Delay           int
+	Brightness      float64
+	Verbose         bool
 }
 
 func LoadConfig() *Config {
 	port := flag.Int("port", 2112, "The port that the health server will bind to")
 	offThreshold := flag.Int("off-threshold", 55.0, "Temperature threshold in degrees C to disable fan")
 	onThreshold := flag.Int("on-threshold", 65.0, "Temperature threshold in degrees C to enable fan")
+	cpuOffThreshold := flag.Int("cpu-off-threshold", 25.0, "The CPU percentage threshold to disable fan")
 	extendedColors := flag.Bool("extended-colors", false, "Extend LED colors for outside of normal low to high range")
 	delay := flag.Int("delay", 2, "Delay, in seconds, between temperature readings")
 	brightness := flag.Int("brightness", 255, "LED brightness, from 0 to 255")
@@ -31,13 +33,14 @@ func LoadConfig() *Config {
 	flag.Parse()
 
 	return &Config{
-		Port:           intValue("PORT", *port),
-		OffThreshold:   float64(intValue("OFF_THRESHOLD", *offThreshold)),
-		OnThreshold:    float64(intValue("ON_THRESHOLD", *onThreshold)),
-		ExtendedColors: boolValue("EXTENDED_COLORS", *extendedColors),
-		Delay:          intValue("DELAY", *delay),
-		Brightness:     float64(intValue("BRIGHTNESS", *brightness)),
-		Verbose:        boolValue("VERBOSE", *verbose),
+		Port:            intValue("PORT", *port),
+		CpuOffThreshold: float64(intValue("CPU_OFF_THRESHOLD", *cpuOffThreshold)),
+		OffThreshold:    float64(intValue("OFF_THRESHOLD", *offThreshold)),
+		OnThreshold:     float64(intValue("ON_THRESHOLD", *onThreshold)),
+		ExtendedColors:  boolValue("EXTENDED_COLORS", *extendedColors),
+		Delay:           intValue("DELAY", *delay),
+		Brightness:      float64(intValue("BRIGHTNESS", *brightness)),
+		Verbose:         boolValue("VERBOSE", *verbose),
 	}
 }
 
